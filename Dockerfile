@@ -6,8 +6,10 @@ LABEL org.opencontainers.image.licenses=AGPL-3.0
 LABEL maintainer="诺墨 <normal@normalcoder.com>"
 
 RUN apk update && \
-    apk add --no-cache openvpn openssl libssl1.1 && \
-    rm -rf /var/cache/apk/*
+    apk add --no-cache openvpn openssl libssl1.1 \
+    bind-tools \
+    iputils \
+    && rm -rf /var/cache/apk/*
 
 RUN set -ex ; \
     apkArch="$(apk --print-arch)" ; \
@@ -27,7 +29,12 @@ RUN mkdir -p /dev/net && \
     mknod /dev/net/tun c 10 200 && \
     chmod 600 /dev/net/tun
 
-
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY config/healthcheck.sh /etc/openvpn-config/
+COPY config/config_manager.sh /etc/openvpn-config/
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /etc/openvpn-config/healthcheck.sh && \
+    chmod +x /etc/openvpn-config/config_manager.sh
+
 ENTRYPOINT ["docker-entrypoint.sh"]

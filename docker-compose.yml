@@ -17,3 +17,10 @@ services:
       - ./config/openvpn:/etc/openvpn-config
       - ./config/shadowsocks/shadowsocks.json:/etc/shadowsocks.json
       - ./logs:/var/log/custom
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/etc/openvpn-config/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
